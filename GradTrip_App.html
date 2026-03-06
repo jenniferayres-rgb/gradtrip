@@ -1,0 +1,1267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1a0a2e">
+<title>🎓 Dalton's Grad Trip</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<style>
+  :root {
+    --bg: #0d0820;
+    --bg2: #160d30;
+    --surface: #1e1240;
+    --surface2: #261850;
+    --border: rgba(160,120,255,0.18);
+    --accent: #a07bff;
+    --accent2: #ff7b9c;
+    --accent3: #7bffd4;
+    --gold: #ffd700;
+    --text: #e8e0ff;
+    --muted: #8878b8;
+    --radius: 14px;
+    --shadow: 0 4px 24px rgba(0,0,0,0.4);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; overflow-x: hidden; }
+  h1,h2,h3,h4 { font-family: 'Syne', sans-serif; }
+
+  /* ===== SETUP SCREEN ===== */
+  #setup-screen {
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 24px;
+    background: radial-gradient(ellipse at 60% 20%, #3a1a6e 0%, #0d0820 60%);
+  }
+  .setup-logo { font-size: 64px; margin-bottom: 8px; }
+  .setup-title { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; text-align: center; background: linear-gradient(135deg, #a07bff, #ff7b9c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 4px; }
+  .setup-sub { color: var(--muted); font-size: 14px; text-align: center; margin-bottom: 32px; }
+  .setup-card { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 28px; width: 100%; max-width: 380px; }
+  .setup-card label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 8px; }
+  .setup-card input { width: 100%; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; color: var(--text); font-size: 16px; font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 20px; }
+  .setup-card input:focus { border-color: var(--accent); }
+  .avatar-label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+  .avatar-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-bottom: 24px; }
+  .avatar-btn { width: 100%; aspect-ratio: 1; border-radius: 10px; border: 2px solid transparent; background: var(--bg2); font-size: 24px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; }
+  .avatar-btn.sel { border-color: var(--accent); background: rgba(160,123,255,0.2); }
+  .btn-primary { width: 100%; padding: 14px; border-radius: 12px; border: none; background: linear-gradient(135deg, var(--accent), var(--accent2)); color: white; font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; cursor: pointer; transition: opacity 0.15s; }
+  .btn-primary:active { opacity: 0.8; }
+
+  /* ===== MAIN APP ===== */
+  #app { display: none; flex-direction: column; min-height: 100vh; }
+  .top-bar { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; }
+  .top-bar-left { display: flex; align-items: center; gap: 10px; }
+  .top-bar-av { font-size: 26px; }
+  .top-bar-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; }
+  .top-bar-mode { font-size: 11px; color: var(--muted); }
+  .top-bar-pts { display: flex; align-items: center; gap: 4px; background: rgba(255,215,0,0.12); border: 1px solid rgba(255,215,0,0.3); border-radius: 20px; padding: 5px 12px; }
+  .top-bar-pts span { font-family: 'Syne', sans-serif; font-weight: 700; color: var(--gold); font-size: 15px; }
+
+  .content { flex: 1; overflow-y: auto; padding-bottom: 80px; }
+  .panel { display: none; padding: 16px; }
+  .panel.active { display: block; }
+
+  /* ===== BOTTOM NAV ===== */
+  .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg2); border-top: 1px solid var(--border); display: flex; z-index: 100; }
+  .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 8px 4px; border: none; background: none; color: var(--muted); cursor: pointer; transition: color 0.15s; font-size: 10px; gap: 3px; }
+  .nav-btn .nicon { font-size: 20px; }
+  .nav-btn.active { color: var(--accent); }
+
+  /* ===== CARDS ===== */
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+  .card-title { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 16px; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .section-header { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; margin-bottom: 16px; margin-top: 8px; }
+
+  /* ===== OVERVIEW ===== */
+  .hero-card { background: linear-gradient(135deg, #2a1060 0%, #1a0a3e 100%); border: 1px solid rgba(160,123,255,0.3); border-radius: 20px; padding: 24px; margin-bottom: 16px; text-align: center; }
+  .hero-emoji { font-size: 56px; margin-bottom: 8px; }
+  .hero-title { font-family: 'Syne', sans-serif; font-size: 24px; font-weight: 800; background: linear-gradient(135deg, #a07bff, #ff7b9c); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero-sub { color: var(--muted); font-size: 13px; margin-top: 6px; }
+  .fact-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .fact-chip { background: var(--surface2); border-radius: 8px; padding: 8px 12px; flex: 1; text-align: center; }
+  .fact-chip .fc-val { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 18px; color: var(--accent); }
+  .fact-chip .fc-lbl { font-size: 11px; color: var(--muted); }
+  .contact-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .contact-row:last-child { border-bottom: none; }
+  .contact-em { font-size: 22px; }
+  .contact-name { font-weight: 600; font-size: 14px; }
+  .contact-detail { font-size: 12px; color: var(--muted); }
+
+  /* ===== STOPS/MAP ===== */
+  #map { height: 220px; border-radius: var(--radius); margin-bottom: 16px; background: var(--surface); overflow: hidden; }
+  .day-tabs { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
+  .day-tab { padding: 8px 16px; border-radius: 20px; border: 1px solid var(--border); background: none; color: var(--muted); font-family: 'Syne', sans-serif; font-size: 13px; white-space: nowrap; cursor: pointer; }
+  .day-tab.active { background: var(--accent); border-color: var(--accent); color: white; }
+  .stop-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; cursor: pointer; }
+  .stop-card.done { opacity: 0.5; }
+  .stop-icon { font-size: 28px; flex-shrink: 0; }
+  .stop-info { flex: 1; }
+  .stop-name { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 14px; }
+  .stop-desc { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .stop-badges { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .badge { padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; }
+  .badge-blue { background: rgba(123,178,255,0.15); color: #7bb2ff; }
+  .badge-pink { background: rgba(255,123,156,0.15); color: #ff7b9c; }
+  .badge-green { background: rgba(123,255,212,0.15); color: #7bffd4; }
+  .badge-done { background: rgba(123,255,212,0.2); color: #7bffd4; border: 1px solid rgba(123,255,212,0.3); }
+  .btn-complete { padding: 8px 14px; border-radius: 8px; border: 1px solid var(--accent); background: rgba(160,123,255,0.1); color: var(--accent); font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+
+  /* ===== GAMES ===== */
+  .game-tabs { display: flex; gap: 6px; margin-bottom: 16px; flex-wrap: wrap; }
+  .game-tab { padding: 7px 14px; border-radius: 20px; border: 1px solid var(--border); background: none; color: var(--muted); font-family: 'Syne', sans-serif; font-size: 12px; cursor: pointer; }
+  .game-tab.active { background: var(--surface2); border-color: var(--accent); color: var(--accent); }
+  .game-panel { display: none; }
+  .game-panel.active { display: block; }
+
+  /* Bingo */
+  .bingo-board { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 16px; }
+  .bingo-cell { aspect-ratio: 1; background: var(--surface2); border-radius: 8px; display: flex; align-items: center; justify-content: center; text-align: center; font-size: 10px; line-height: 1.2; cursor: pointer; border: 1px solid transparent; padding: 2px; color: var(--muted); transition: all 0.15s; }
+  .bingo-cell.marked { background: linear-gradient(135deg, var(--accent), #7b55cc); border-color: var(--accent); color: white; font-weight: 600; }
+  .bingo-cell.free { background: linear-gradient(135deg, var(--accent2), #cc5577); color: white; font-weight: 700; font-size: 11px; }
+  .bingo-header { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 4px; }
+  .bingo-col-hd { text-align: center; font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px; color: var(--accent); }
+
+  /* License Plates */
+  .plates-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+  .plate-cell { background: var(--surface2); border-radius: 8px; padding: 8px 4px; text-align: center; font-size: 11px; font-weight: 600; cursor: pointer; border: 1px solid transparent; color: var(--muted); }
+  .plate-cell.found { background: rgba(123,255,212,0.15); border-color: rgba(123,255,212,0.4); color: var(--accent3); }
+
+  /* Scavenger Hunt */
+  .hunt-item { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+  .hunt-item:last-child { border-bottom: none; }
+  .hunt-check { width: 24px; height: 24px; border-radius: 6px; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; }
+  .hunt-item.found .hunt-check { background: var(--accent3); border-color: var(--accent3); }
+  .hunt-name { flex: 1; font-size: 14px; }
+  .hunt-item.found .hunt-name { color: var(--muted); text-decoration: line-through; }
+  .hunt-pts { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 13px; color: var(--gold); }
+
+  /* Trivia */
+  .trivia-q { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+  .trivia-q-text { font-weight: 600; font-size: 15px; margin-bottom: 12px; }
+  .trivia-opts { display: flex; flex-direction: column; gap: 8px; }
+  .trivia-opt { padding: 10px 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--surface2); color: var(--text); font-size: 13px; cursor: pointer; text-align: left; transition: all 0.15s; }
+  .trivia-opt.correct { background: rgba(123,255,212,0.2); border-color: var(--accent3); }
+  .trivia-opt.wrong { background: rgba(255,100,100,0.2); border-color: rgba(255,100,100,0.5); }
+  .trivia-result { font-size: 13px; margin-top: 8px; font-weight: 600; }
+
+  /* ===== LEADERBOARD ===== */
+  .lb-row { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--surface); border-radius: var(--radius); margin-bottom: 8px; border: 1px solid var(--border); }
+  .lb-rank { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; width: 32px; text-align: center; }
+  .lb-av { font-size: 28px; }
+  .lb-name { flex: 1; font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; }
+  .lb-pts { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 20px; color: var(--gold); }
+
+  /* ===== MUSIC ===== */
+  .music-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+  .music-input-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .music-input-row input { flex: 1; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; }
+  .btn-sm { padding: 10px 16px; border-radius: 8px; border: none; background: var(--accent); color: white; font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; }
+  .song-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .song-row:last-child { border-bottom: none; }
+  .song-info { flex: 1; }
+  .song-title { font-weight: 600; font-size: 14px; }
+  .song-meta { font-size: 12px; color: var(--muted); }
+  .song-played { font-size: 11px; color: var(--accent3); font-weight: 600; }
+  .btn-played { padding: 6px 12px; border-radius: 6px; border: 1px solid var(--border); background: none; color: var(--muted); font-size: 11px; cursor: pointer; }
+  .btn-played.done { color: var(--accent3); border-color: var(--accent3); }
+
+  /* ===== CHAT ===== */
+  .chat-msgs { display: flex; flex-direction: column; gap: 10px; margin-bottom: 12px; min-height: 200px; }
+  .msg-row { display: flex; gap: 8px; align-items: flex-end; }
+  .msg-av { font-size: 20px; flex-shrink: 0; }
+  .msg-bubble { background: var(--surface); border: 1px solid var(--border); border-radius: 14px 14px 14px 4px; padding: 10px 14px; max-width: 80%; }
+  .msg-name { font-size: 11px; color: var(--accent); font-weight: 600; margin-bottom: 2px; }
+  .msg-text { font-size: 14px; }
+  .msg-time { font-size: 10px; color: var(--muted); margin-top: 2px; }
+  .msg-row.mine { flex-direction: row-reverse; }
+  .msg-row.mine .msg-bubble { background: rgba(160,123,255,0.2); border-color: rgba(160,123,255,0.3); border-radius: 14px 14px 4px 14px; }
+  .chat-input-row { display: flex; gap: 8px; position: sticky; bottom: 80px; background: var(--bg); padding: 8px 0; }
+  .chat-input-row input { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: 24px; padding: 12px 16px; color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; }
+
+  /* ===== BUDGET ===== */
+  .budget-summary { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+  .budget-chip { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; text-align: center; }
+  .budget-chip .bval { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 22px; color: var(--accent3); }
+  .budget-chip .blbl { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .expense-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 16px; }
+  .expense-form select, .expense-form input { width: 100%; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; margin-bottom: 10px; }
+  .expense-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .expense-row:last-child { border-bottom: none; }
+  .exp-cat { font-size: 20px; }
+  .exp-info { flex: 1; }
+  .exp-desc { font-size: 14px; font-weight: 500; }
+  .exp-cat-lbl { font-size: 11px; color: var(--muted); }
+  .exp-amt { font-family: 'Syne', sans-serif; font-weight: 700; font-size: 15px; color: var(--accent3); }
+
+  /* ===== WEATHER ===== */
+  .weather-card { background: linear-gradient(135deg, #1a2a4a, #0d1a30); border: 1px solid rgba(123,178,255,0.2); border-radius: 20px; padding: 24px; text-align: center; margin-bottom: 16px; }
+  .weather-icon { font-size: 64px; margin-bottom: 8px; }
+  .weather-temp { font-family: 'Syne', sans-serif; font-size: 48px; font-weight: 800; color: #7bb2ff; }
+  .weather-desc { font-size: 16px; color: var(--muted); margin-top: 4px; }
+  .weather-loc { font-size: 14px; color: var(--text); margin-top: 8px; font-weight: 600; }
+
+  /* ===== CHECKLIST ===== */
+  .check-item { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+  .check-item:last-child { border-bottom: none; }
+  .check-box { width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--border); display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 12px; }
+  .check-item.checked .check-box { background: var(--accent); border-color: var(--accent); }
+  .check-item.checked .check-text { color: var(--muted); text-decoration: line-through; }
+  .check-text { font-size: 14px; flex: 1; }
+
+  /* ===== JOURNAL ===== */
+  .journal-entry { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; margin-bottom: 12px; }
+  .journal-form textarea { width: 100%; background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 12px; color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; resize: none; min-height: 100px; margin-bottom: 10px; }
+
+  /* ===== MODAL ===== */
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; align-items: flex-end; }
+  .modal-overlay.open { display: flex; }
+  .modal-box { background: var(--bg2); border-top: 1px solid var(--border); border-radius: 20px 20px 0 0; padding: 24px; width: 100%; max-height: 80vh; overflow-y: auto; }
+  .modal-title { font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px; margin-bottom: 16px; }
+  .stars { display: flex; gap: 8px; font-size: 32px; margin-bottom: 16px; }
+  .star-btn { cursor: pointer; opacity: 0.3; transition: opacity 0.1s; }
+  .star-btn.lit { opacity: 1; }
+  .modal-textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; resize: none; min-height: 80px; margin-bottom: 16px; }
+  .modal-btns { display: flex; gap: 10px; }
+  .btn-cancel { flex: 1; padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: none; color: var(--muted); font-family: 'Syne', sans-serif; font-size: 14px; cursor: pointer; }
+
+  /* ===== TOAST ===== */
+  #toast { position: fixed; top: 80px; left: 50%; transform: translateX(-50%) translateY(-20px); background: var(--surface2); border: 1px solid var(--accent); border-radius: 20px; padding: 10px 20px; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; color: var(--accent); z-index: 999; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ===== CONFETTI ===== */
+  .confetti-piece { position: fixed; width: 10px; height: 10px; border-radius: 2px; pointer-events: none; z-index: 998; animation: confettiFall 2s ease-in forwards; }
+  @keyframes confettiFall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
+
+  /* ===== PHASE BUTTONS ===== */
+  .phase-bar { display: flex; gap: 8px; padding: 12px 16px; background: var(--bg2); border-bottom: 1px solid var(--border); overflow-x: auto; }
+  .phase-btn { padding: 7px 14px; border-radius: 20px; border: 1px solid var(--border); background: none; color: var(--muted); font-family: 'Syne', sans-serif; font-size: 12px; cursor: pointer; white-space: nowrap; }
+  .phase-btn.active { background: var(--surface2); border-color: var(--accent2); color: var(--accent2); }
+
+  /* ===== PHOTOS ===== */
+  .photos-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .photo-thumb { aspect-ratio: 1; border-radius: 8px; object-fit: cover; width: 100%; background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 28px; }
+  .photo-upload-btn { aspect-ratio: 1; border-radius: 8px; background: var(--surface); border: 1px dashed var(--border); display: flex; align-items: center; justify-content: center; font-size: 28px; cursor: pointer; }
+
+  /* ===== CO CHECKPOINT ===== */
+  .co-btn { width: 100%; padding: 18px; border-radius: 16px; border: 2px solid var(--accent3); background: rgba(123,255,212,0.1); color: var(--accent3); font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; cursor: pointer; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+</style>
+</head>
+<body>
+
+<!-- SETUP SCREEN -->
+<div id="setup-screen">
+  <div class="setup-logo">🎓</div>
+  <div class="setup-title">Dalton's Grad Trip</div>
+  <div class="setup-sub">Coldspring, TX → Colorado Springs, CO · June 2026</div>
+  <div class="setup-card">
+    <label>Your Name</label>
+    <input type="text" id="name-input" placeholder="Enter your name..." maxlength="20">
+    <div class="avatar-label">Pick Your Avatar</div>
+    <div class="avatar-grid" id="avatar-grid"></div>
+    <button class="btn-primary" onclick="setupLogin()">Let's Go! 🚗</button>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <div class="top-bar-av" id="tb-av">🙂</div>
+      <div>
+        <div class="top-bar-name" id="tb-name">Traveler</div>
+        <div class="top-bar-mode" id="tb-mode">Pre-Trip</div>
+      </div>
+    </div>
+    <div class="top-bar-pts"><span>⭐</span><span id="tb-pts">0</span> pts</div>
+  </div>
+
+  <div class="phase-bar">
+    <button class="phase-btn active" id="pb-pre" onclick="setPhase('pre')">Pre-Trip</button>
+    <button class="phase-btn" id="pb-trip" onclick="setPhase('trip')">Trip Mode 🚗</button>
+    <button class="phase-btn" id="pb-post" onclick="setPhase('post')">Post-Trip</button>
+  </div>
+
+  <div class="content">
+    <!-- PRE-TRIP PANELS -->
+    <div class="panel active" id="p-overview">
+      <div class="hero-card">
+        <div class="hero-emoji">🏔️</div>
+        <div class="hero-title">Dalton's Graduation Road Trip</div>
+        <div class="hero-sub">June 10–16, 2026  ·  ~1,760 miles  ·  4 states</div>
+      </div>
+      <div class="fact-row">
+        <div class="fact-chip"><div class="fc-val">1,760</div><div class="fc-lbl">Total Miles</div></div>
+        <div class="fact-chip"><div class="fc-val">4</div><div class="fc-lbl">States</div></div>
+        <div class="fact-chip"><div class="fc-val">7</div><div class="fc-lbl">Days</div></div>
+      </div>
+      <div class="fact-row">
+        <div class="fact-chip"><div class="fc-val">Jun 10</div><div class="fc-lbl">Depart</div></div>
+        <div class="fact-chip"><div class="fc-val">Jun 11</div><div class="fc-lbl">Arrive CO</div></div>
+        <div class="fact-chip"><div class="fc-val">Jun 16</div><div class="fc-lbl">Return</div></div>
+      </div>
+      <div class="section-header">🎓 About Dalton</div>
+      <div class="card">
+        <p style="font-size:14px;color:var(--muted);line-height:1.6;">Celebrating Dalton's graduation with an epic road trip from Coldspring, TX to Colorado Springs, CO! University of Denver graduate heading to the Rockies for a well-earned adventure with family & friends.</p>
+      </div>
+      <div class="section-header">📞 Contacts</div>
+      <div class="card">
+        <div class="contact-row"><div class="contact-em">🎓</div><div><div class="contact-name">Dalton</div><div class="contact-detail">The Graduate</div></div></div>
+        <div class="contact-row"><div class="contact-em">💛</div><div><div class="contact-name">Lindsey</div><div class="contact-detail">Trip Support</div></div></div>
+        <div class="contact-row"><div class="contact-em">🚗</div><div><div class="contact-name">Jenna</div><div class="contact-detail">Driver · Truck</div></div></div>
+        <div class="contact-row"><div class="contact-em">👩</div><div><div class="contact-name">Sharon & Cheryl</div><div class="contact-detail">Supporting the adventure</div></div></div>
+      </div>
+      <div class="section-header">🗺️ Route Overview</div>
+      <div class="card">
+        <div style="font-size:13px;color:var(--muted);line-height:1.8;">
+          📍 <b style="color:var(--text)">Day 1</b> — Coldspring, TX → Amarillo, TX<br>
+          📍 <b style="color:var(--text)">Day 2</b> — Amarillo → Colorado Springs, CO<br>
+          🏔️ <b style="color:var(--text)">Days 3-5</b> — Explore Colorado Springs<br>
+          📍 <b style="color:var(--text)">Day 6</b> — Colorado Springs → Amarillo<br>
+          📍 <b style="color:var(--text)">Day 7</b> — Amarillo → Coldspring, TX
+        </div>
+      </div>
+      <div id="start-trip-section" style="margin-top:16px;">
+        <button class="btn-primary" onclick="setPhase('trip')">🚗 Start Trip!</button>
+      </div>
+    </div>
+
+    <!-- CHECKLIST -->
+    <div class="panel" id="p-prep">
+      <div class="section-header">📋 Pre-Trip Checklist</div>
+      <div id="countdown-card" class="card" style="text-align:center;margin-bottom:16px;">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">Time Until Departure</div>
+        <div id="countdown" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--accent);">Loading...</div>
+      </div>
+      <div class="card" id="checklist-container"></div>
+    </div>
+
+    <!-- TRIP OVERVIEW / TODAY -->
+    <div class="panel" id="p-today">
+      <div class="section-header">🌤️ Today</div>
+      <div id="weather-container">
+        <div class="weather-card">
+          <div class="weather-icon">🌤️</div>
+          <div class="weather-temp">--°</div>
+          <div class="weather-desc">Loading weather...</div>
+          <div class="weather-loc">Current Location</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">🗺️ Quick Links</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <button class="btn-sm" onclick="showPanel('p-stops')">🗺️ Stops</button>
+          <button class="btn-sm" onclick="showPanel('p-games')" style="background:var(--accent2);">🎯 Games</button>
+          <button class="btn-sm" onclick="showPanel('p-chat')" style="background:#3a6acc;">💬 Chat</button>
+          <button class="btn-sm" onclick="showPanel('p-budget')" style="background:#2a7a5a;">💰 Budget</button>
+        </div>
+      </div>
+      <button class="co-btn" onclick="coloradoCheckpoint()">🏔️ Colorado Checkpoint! +25 pts</button>
+    </div>
+
+    <!-- STOPS -->
+    <div class="panel" id="p-stops">
+      <div id="map"></div>
+      <div class="day-tabs" id="day-tabs"></div>
+      <div id="stops-list"></div>
+    </div>
+
+    <!-- GAMES -->
+    <div class="panel" id="p-games">
+      <div class="section-header">🎯 Games</div>
+      <div class="game-tabs">
+        <button class="game-tab active" onclick="switchGame('bingo',this)">🎲 Bingo</button>
+        <button class="game-tab" onclick="switchGame('plates',this)">🚗 Plates</button>
+        <button class="game-tab" onclick="switchGame('hunt',this)">🔍 Hunt</button>
+        <button class="game-tab" onclick="switchGame('trivia',this)">❓ Trivia</button>
+      </div>
+      <div class="game-panel active" id="game-bingo">
+        <div class="bingo-header"><div class="bingo-col-hd">B</div><div class="bingo-col-hd">I</div><div class="bingo-col-hd">N</div><div class="bingo-col-hd">G</div><div class="bingo-col-hd">O</div></div>
+        <div class="bingo-board" id="bingo-board"></div>
+        <div id="bingo-score" class="card" style="text-align:center;"><span id="bingo-count" style="font-family:'Syne',sans-serif;font-size:24px;font-weight:800;color:var(--gold);">0</span><div style="font-size:12px;color:var(--muted);">Bingo Points</div></div>
+      </div>
+      <div class="game-panel" id="game-plates">
+        <div class="card" style="text-align:center;margin-bottom:12px;">
+          <span id="plates-count" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--gold);">0</span>
+          <span style="font-size:14px;color:var(--muted);"> / 50 states found</span>
+        </div>
+        <div class="plates-grid" id="plates-grid"></div>
+      </div>
+      <div class="game-panel" id="game-hunt">
+        <div class="card" style="text-align:center;margin-bottom:12px;">
+          <span id="hunt-pts" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--gold);">0</span>
+          <span style="font-size:14px;color:var(--muted);"> hunt points</span>
+        </div>
+        <div class="card" id="hunt-list"></div>
+      </div>
+      <div class="game-panel" id="game-trivia">
+        <div class="card" style="text-align:center;margin-bottom:12px;">
+          <span id="trivia-pts" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--gold);">0</span>
+          <span style="font-size:14px;color:var(--muted);"> trivia points</span>
+        </div>
+        <div id="trivia-list"></div>
+      </div>
+    </div>
+
+    <!-- STATS / LEADERBOARD -->
+    <div class="panel" id="p-stats">
+      <div class="section-header">🏆 Leaderboard</div>
+      <div id="lb-list"></div>
+      <button class="btn-sm" onclick="addDemoPlayer()" style="width:100%;margin-top:8px;">+ Add Demo Player</button>
+    </div>
+
+    <!-- MUSIC -->
+    <div class="panel" id="p-music">
+      <div class="section-header">🎵 Music Requests</div>
+      <div class="music-form">
+        <div class="music-input-row">
+          <input type="text" id="song-input" placeholder="Song title...">
+          <input type="text" id="artist-input" placeholder="Artist...">
+        </div>
+        <button class="btn-sm" style="width:100%;" onclick="submitSong()">🎵 Request Song</button>
+      </div>
+      <div class="card" id="song-queue"></div>
+    </div>
+
+    <!-- CHAT -->
+    <div class="panel" id="p-chat">
+      <div class="section-header">💬 Group Chat</div>
+      <div class="chat-msgs" id="chat-msgs"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" placeholder="Say something..." onkeydown="if(event.key==='Enter')sendChat()">
+        <button class="btn-sm" onclick="sendChat()">Send</button>
+      </div>
+    </div>
+
+    <!-- PHOTOS -->
+    <div class="panel" id="p-photos">
+      <div class="section-header">📸 Photo Album</div>
+      <div class="photos-grid" id="photos-grid">
+        <div class="photo-upload-btn" onclick="document.getElementById('photo-upload').click()">📷<br><span style="font-size:11px">Add</span></div>
+      </div>
+      <input type="file" id="photo-upload" accept="image/*" style="display:none" onchange="addPhoto(this)">
+    </div>
+
+    <!-- BUDGET -->
+    <div class="panel" id="p-budget">
+      <div class="section-header">💰 Budget Tracker</div>
+      <div class="budget-summary" id="budget-summary">
+        <div class="budget-chip"><div class="bval" id="total-spent">$0</div><div class="blbl">Total Spent</div></div>
+        <div class="budget-chip"><div class="bval" id="per-person">$0</div><div class="blbl">Per Person</div></div>
+        <div class="budget-chip"><div class="bval" id="sharon-contrib">$0</div><div class="blbl">Sharon</div></div>
+        <div class="budget-chip"><div class="bval" id="cheryl-contrib">$0</div><div class="blbl">Cheryl</div></div>
+      </div>
+      <div class="expense-form">
+        <select id="exp-cat">
+          <option value="⛽ Gas">⛽ Gas</option>
+          <option value="🍔 Food">🍔 Food</option>
+          <option value="🏨 Lodging">🏨 Lodging</option>
+          <option value="🎡 Activities">🎡 Activities</option>
+          <option value="🛒 Other">🛒 Other</option>
+        </select>
+        <input type="text" id="exp-desc" placeholder="Description...">
+        <input type="number" id="exp-amt" placeholder="Amount ($)" step="0.01">
+        <button class="btn-sm" style="width:100%;" onclick="addExpense()">+ Add Expense</button>
+      </div>
+      <div class="card" id="expense-list"></div>
+    </div>
+
+    <!-- POST-TRIP JOURNAL -->
+    <div class="panel" id="p-journal">
+      <div class="section-header">📖 Trip Journal</div>
+      <div class="journal-form card">
+        <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">Share a memory from the trip...</div>
+        <textarea id="journal-input" placeholder="Write about today..."></textarea>
+        <select id="journal-day" style="width:100%;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px;color:var(--text);font-size:14px;margin-bottom:10px;">
+          <option>June 10 – Departure Day</option>
+          <option>June 11 – Arriving in Colorado</option>
+          <option>June 12 – Exploring Colorado Springs</option>
+          <option>June 13 – Pikes Peak Day</option>
+          <option>June 14 – Last Day in CO</option>
+          <option>June 15 – Heading Home</option>
+          <option>June 16 – Back in Texas</option>
+        </select>
+        <button class="btn-sm" style="width:100%;" onclick="addJournalEntry()">📝 Save Entry</button>
+      </div>
+      <div id="journal-entries"></div>
+    </div>
+
+    <!-- POST-TRIP STATS -->
+    <div class="panel" id="p-post-stats">
+      <div class="section-header">📊 Trip Recap</div>
+      <div id="post-stats-content"></div>
+      <button class="btn-sm" style="width:100%;margin-top:16px;" onclick="setPhase('trip')">🚗 Back to Trip Mode</button>
+    </div>
+  </div>
+
+  <!-- Bottom Nav (pre-trip) -->
+  <div class="bottom-nav" id="nav-pre">
+    <button class="nav-btn active" onclick="showPanel('p-overview');setActiveNav(this)"><div class="nicon">🏠</div>Overview</button>
+    <button class="nav-btn" onclick="showPanel('p-prep');setActiveNav(this)"><div class="nicon">📋</div>Prep</button>
+    <button class="nav-btn" onclick="showPanel('p-stats');updateLeaderboard();setActiveNav(this)"><div class="nicon">🏆</div>Stats</button>
+  </div>
+
+  <!-- Bottom Nav (trip) -->
+  <div class="bottom-nav" id="nav-trip" style="display:none;">
+    <button class="nav-btn active" onclick="showPanel('p-today');setActiveNav(this)"><div class="nicon">🏠</div>Today</button>
+    <button class="nav-btn" onclick="showPanel('p-stops');initMap();setActiveNav(this)"><div class="nicon">🗺️</div>Stops</button>
+    <button class="nav-btn" onclick="showPanel('p-games');setActiveNav(this)"><div class="nicon">🎯</div>Games</button>
+    <button class="nav-btn" onclick="showPanel('p-stats');updateLeaderboard();setActiveNav(this)"><div class="nicon">🏆</div>Stats</button>
+    <button class="nav-btn" onclick="showMoreMenu()"><div class="nicon">⋯</div>More</button>
+  </div>
+
+  <!-- Bottom Nav (post) -->
+  <div class="bottom-nav" id="nav-post" style="display:none;">
+    <button class="nav-btn active" onclick="showPanel('p-post-stats');updatePostStats();setActiveNav(this)"><div class="nicon">📊</div>Recap</button>
+    <button class="nav-btn" onclick="showPanel('p-photos');setActiveNav(this)"><div class="nicon">📸</div>Photos</button>
+    <button class="nav-btn" onclick="showPanel('p-journal');setActiveNav(this)"><div class="nicon">📖</div>Journal</button>
+    <button class="nav-btn" onclick="showPanel('p-stats');updateLeaderboard();setActiveNav(this)"><div class="nicon">🏆</div>Stats</button>
+  </div>
+</div>
+
+<!-- MORE MENU MODAL -->
+<div class="modal-overlay" id="more-modal">
+  <div class="modal-box">
+    <div class="modal-title">More ⋯</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <button class="btn-sm" onclick="showPanel('p-music');closeModal('more-modal');setActiveNav(null)" style="padding:14px;font-size:14px;">🎵 Music</button>
+      <button class="btn-sm" onclick="showPanel('p-chat');closeModal('more-modal');setActiveNav(null)" style="background:var(--accent2);padding:14px;font-size:14px;">💬 Chat</button>
+      <button class="btn-sm" onclick="showPanel('p-photos');closeModal('more-modal');setActiveNav(null)" style="background:#3a6acc;padding:14px;font-size:14px;">📸 Photos</button>
+      <button class="btn-sm" onclick="showPanel('p-budget');closeModal('more-modal');setActiveNav(null)" style="background:#2a7a5a;padding:14px;font-size:14px;">💰 Budget</button>
+    </div>
+    <button class="btn-cancel" style="margin-top:12px;width:100%;" onclick="closeModal('more-modal')">Close</button>
+  </div>
+</div>
+
+<!-- STOP COMPLETE MODAL -->
+<div class="modal-overlay" id="stop-modal">
+  <div class="modal-box">
+    <div class="modal-title" id="stop-modal-title">Complete Stop</div>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:8px;">Rate your experience</div>
+    <div class="stars" id="stop-stars">
+      <span class="star-btn" onclick="setStars(1)">⭐</span>
+      <span class="star-btn" onclick="setStars(2)">⭐</span>
+      <span class="star-btn" onclick="setStars(3)">⭐</span>
+      <span class="star-btn" onclick="setStars(4)">⭐</span>
+      <span class="star-btn" onclick="setStars(5)">⭐</span>
+    </div>
+    <textarea class="modal-textarea" id="stop-note" placeholder="Add a note about this stop..."></textarea>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('stop-modal')">Cancel</button>
+      <button class="btn-primary" style="flex:1;" onclick="confirmComplete()">✓ Mark Complete (+15 pts)</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast">🎉 +10 points!</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+// ===== DATA =====
+const AVATARS = ['🎓','🚗','🏔️','🤠','🎸','🌮','⭐','🦅','🌵','🎯','🏆','🎲','🦋','🐻','🌈','🎪','🎨','🦁','🚀','💎'];
+
+const STOPS = {
+  out: [
+    { id:'o1', name:'Coldspring, TX Departure', icon:'🏠', type:'Start', desc:'Home base — load up and hit the road!', day:1, lat:30.9162, lng:-95.1352 },
+    { id:'o2', name:'Huntsville State Park', icon:'🌲', type:'Stop', desc:'Stretch your legs in Sam Houston National Forest', day:1, lat:30.6224, lng:-95.5233 },
+    { id:'o3', name:'Dallas Lunch Stop', icon:'🍔', type:'Food', desc:'Big D lunch break', day:1, lat:32.7767, lng:-96.7970 },
+    { id:'o4', name:'Wichita Falls', icon:'💦', type:'Stop', desc:'Famous waterfall stop and fuel up', day:1, lat:33.9137, lng:-98.4934 },
+    { id:'o5', name:'Amarillo, TX', icon:'🏨', type:'Hotel', desc:'Night 1 — Texas Panhandle stop', day:1, lat:35.2220, lng:-101.8313 },
+    { id:'o6', name:'Cadillac Ranch', icon:'🚗', type:'Attraction', desc:'Iconic buried Cadillacs art installation', day:2, lat:35.1872, lng:-101.9870 },
+    { id:'o7', name:'New Mexico State Line', icon:'🪧', type:'Milestone', desc:'Welcome to New Mexico! 3rd state!', day:2, lat:35.1822, lng:-103.0426 },
+    { id:'o8', name:'Santa Fe', icon:'🏛️', type:'Stop', desc:'Historic plaza, amazing food, art galleries', day:2, lat:35.6870, lng:-105.9378 },
+    { id:'o9', name:'Colorado State Line', icon:'🏔️', type:'Milestone', desc:'YOU MADE IT TO COLORADO! 🎉', day:2, lat:37.0009, lng:-105.0000 },
+    { id:'o10', name:'Colorado Springs', icon:'🏔️', type:'Hotel', desc:'Base camp for the Colorado adventure!', day:2, lat:38.8339, lng:-104.8214 },
+  ],
+  co: [
+    { id:'c1', name:'Garden of the Gods', icon:'🪨', type:'Attraction', desc:'Spectacular red rock formations', day:3, lat:38.8787, lng:-104.8756 },
+    { id:'c2', name:'Pikes Peak Summit', icon:'⛰️', type:'Attraction', desc:'14,115 ft above sea level — incredible views!', day:3, lat:38.8405, lng:-105.0442 },
+    { id:'c3', name:'Old Colorado City', icon:'🛍️', type:'Food', desc:'Historic district — lunch and shops', day:3, lat:38.8338, lng:-104.8591 },
+    { id:'c4', name:'US Air Force Academy', icon:'✈️', type:'Attraction', desc:'Stunning chapel and visitor center', day:4, lat:38.9981, lng:-104.8614 },
+    { id:'c5', name:'Colorado Springs Downtown', icon:'🏙️', type:'Food', desc:'Dinner on Tejon Street', day:4, lat:38.8339, lng:-104.8214 },
+    { id:'c6', name:'Cheyenne Mountain Zoo', icon:'🦒', type:'Attraction', desc:'Only mountain zoo in the US!', day:5, lat:38.7939, lng:-104.8614 },
+  ],
+  ret: [
+    { id:'r1', name:'Colorado Springs Departure', icon:'👋', type:'Start', desc:'Goodbye Colorado! What a trip!', day:6, lat:38.8339, lng:-104.8214 },
+    { id:'r2', name:'Pueblo', icon:'⛽', type:'Stop', desc:'Fuel and snacks', day:6, lat:38.2544, lng:-104.6091 },
+    { id:'r3', name:'New Mexico Again', icon:'🌵', type:'Milestone', desc:'Through the Land of Enchantment', day:6, lat:36.7173, lng:-104.9810 },
+    { id:'r4', name:'Amarillo Return Night', icon:'🏨', type:'Hotel', desc:'Night 2 on the road', day:6, lat:35.2220, lng:-101.8313 },
+    { id:'r5', name:'Texas Panhandle Drive', icon:'🌾', type:'Stop', desc:'Big sky country — spot some longhorns', day:7, lat:33.5779, lng:-101.8552 },
+    { id:'r6', name:'Dallas Lunch Return', icon:'🍔', type:'Food', desc:'Last big city lunch', day:7, lat:32.7767, lng:-96.7970 },
+    { id:'r7', name:'Coldspring, TX Home!', icon:'🏠', type:'End', desc:'WELCOME HOME GRADUATES! 🎓🎉', day:7, lat:30.9162, lng:-95.1352 },
+  ]
+};
+
+const HUNT_ITEMS = [
+  { name:'Yellow school bus', pts:3 },{ name:'Tumbleweed rolling', pts:5 },{ name:'Oil pump jack', pts:3 },
+  { name:'Hot air balloon', pts:10 },{ name:'Double rainbow', pts:15 },{ name:'Roadrunner bird', pts:10 },
+  { name:'Longhorn cattle', pts:5 },{ name:'Red rock formation', pts:3 },{ name:'Mountain goat/bighorn', pts:12 },
+  { name:'Convertible car', pts:3 },{ name:'RV convoy (3+)', pts:5 },{ name:'State trooper motorcycle', pts:5 },
+  { name:'Someone waving from truck', pts:3 },{ name:'Windmill farm', pts:3 },{ name:'Bald eagle', pts:15 },
+  { name:'Drive-in movie theater', pts:8 },{ name:'Grain elevator', pts:3 },{ name:'Election sign', pts:3 },
+  { name:'Horse trailer', pts:3 },{ name:'Snow-capped peak', pts:5 },
+];
+
+const US_STATES = ['AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','TX','UT','VT','VA','WA','WV','WI','WY'];
+
+const BINGO_SQUARES = [
+  'Spotted a cactus','Rest stop bathroom break','Someone fell asleep','Found WiFi in the middle of nowhere','Cow on the highway',
+  'Big rig passed us','Gas station snack run','Texas tumbleweeds','Mile marker 420','Someone needed directions',
+  'Roadkill spotted','Beautiful sunset','Mountains first view','Radio sing-along','Fast food drive-thru',
+  'License plate game','State border photo','Car trouble false alarm','Missed exit','Rain out of nowhere',
+  'Pulled over spot','Local diner stop','Wildlife sighting','Free space ⭐','Truck stop souvenir',
+];
+
+const TRIVIA = [
+  { q:'What is the University of Denver\'s mascot?', opts:['Pioneer','Bronco','Eagle','Bear'], ans:0 },
+  { q:'Colorado Springs is located at approximately what altitude?', opts:['4,000 ft','5,000 ft','6,000 ft','7,000 ft'], ans:2 },
+  { q:'What is Pikes Peak\'s elevation?', opts:['12,000 ft','13,500 ft','14,115 ft','15,000 ft'], ans:2 },
+  { q:'Which highway is the primary route through the Texas Panhandle?', opts:['I-10','I-20','I-40','I-35'], ans:2 },
+  { q:'Garden of the Gods is located in which Colorado city?', opts:['Denver','Boulder','Colorado Springs','Pueblo'], ans:2 },
+  { q:'What color are the famous rock formations at Garden of the Gods?', opts:['Orange','Red','White','Brown'], ans:1 },
+  { q:'The University of Denver was founded in what year?', opts:['1864','1885','1902','1920'], ans:0 },
+  { q:'Cadillac Ranch is located near which Texas city?', opts:['Dallas','Lubbock','Amarillo','Abilene'], ans:2 },
+  { q:'Colorado is nicknamed the __ State', opts:['Mountain','Centennial','Rocky','High'], ans:1 },
+  { q:'What river runs through Colorado Springs?', opts:['Arkansas River','Colorado River','Pikes Peak Creek','Monument Creek'], ans:3 },
+];
+
+const CHECKLIST_ITEMS = [
+  { id:'doc1', text:'Driver\'s license / ID', cat:'Documents' },
+  { id:'doc2', text:'Insurance & registration', cat:'Documents' },
+  { id:'doc3', text:'Cash + cards', cat:'Documents' },
+  { id:'tech1', text:'Phone chargers (all)', cat:'Tech' },
+  { id:'tech2', text:'Car charger / power bank', cat:'Tech' },
+  { id:'tech3', text:'Aux cord / Bluetooth', cat:'Tech' },
+  { id:'tech4', text:'Camera / GoPro', cat:'Tech' },
+  { id:'cloth1', text:'5+ days of clothing', cat:'Clothes' },
+  { id:'cloth2', text:'Layers for Colorado cold', cat:'Clothes' },
+  { id:'cloth3', text:'Comfortable walking shoes', cat:'Clothes' },
+  { id:'snack1', text:'Road trip snacks loaded', cat:'Snacks' },
+  { id:'snack2', text:'Cooler with drinks', cat:'Snacks' },
+  { id:'car1', text:'Oil checked', cat:'Car' },
+  { id:'car2', text:'Tires inflated', cat:'Car' },
+  { id:'car3', text:'Emergency kit in truck', cat:'Car' },
+  { id:'car4', text:'Gas tank full', cat:'Car' },
+  { id:'misc1', text:'Sunscreen packed', cat:'Misc' },
+  { id:'misc2', text:'First aid kit', cat:'Misc' },
+  { id:'misc3', text:'Download offline maps', cat:'Misc' },
+];
+
+// ===== STATE =====
+let state = {
+  player: null, avatar: null, phase: 'pre',
+  points: 0, stops: {}, bingo: [], bingoWins: 0, bingoPoints: 0,
+  plates: [], huntFound: [], triviaProgress: {},
+  triviaPoints: 0, songs: [], chat: [], photos: [], expenses: [],
+  journal: [], checklist: {}, currentStarRating: 0,
+  pendingStopId: null, mapInit: false, currentDay: 'out-1',
+  players: [],
+};
+
+function save() { try { localStorage.setItem('rt_state', JSON.stringify(state)); } catch(e){} }
+function load() { try { const s = localStorage.getItem('rt_state'); if(s) state = {...state, ...JSON.parse(s)}; } catch(e){} }
+
+// ===== SETUP =====
+load();
+const avGrid = document.getElementById('avatar-grid');
+AVATARS.forEach((av,i) => {
+  const b = document.createElement('button');
+  b.className = 'avatar-btn';
+  b.textContent = av;
+  b.onclick = () => { document.querySelectorAll('.avatar-btn').forEach(x=>x.classList.remove('sel')); b.classList.add('sel'); state.avatar = av; };
+  avGrid.appendChild(b);
+});
+if (state.player && state.avatar) { startApp(); }
+
+function setupLogin() {
+  const name = document.getElementById('name-input').value.trim();
+  if (!name) { toast('Enter your name first!'); return; }
+  if (!state.avatar) { toast('Pick an avatar!'); return; }
+  state.player = name;
+  if (!state.players.find(p=>p.name===name)) {
+    state.players.push({ name, avatar: state.avatar, points: 0 });
+  }
+  save(); startApp();
+}
+
+function startApp() {
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('tb-av').textContent = state.avatar;
+  document.getElementById('tb-name').textContent = state.player;
+  updateTopBar(); initChecklist(); initBingo(); initPlates(); initHunt(); initTrivia();
+  renderSongs(); renderChat(); renderExpenses(); renderPhotos(); renderJournal();
+  setPhase(state.phase, true);
+  startCountdown();
+  loadWeather();
+}
+
+// ===== PHASE =====
+function setPhase(ph, silent) {
+  state.phase = ph;
+  ['pre','trip','post'].forEach(p => {
+    document.getElementById('pb-'+p).classList.toggle('active', p===ph);
+    const nav = document.getElementById('nav-'+p);
+    if (nav) nav.style.display = p===ph ? 'flex' : 'none';
+  });
+  document.getElementById('tb-mode').textContent = ph==='pre'?'Pre-Trip':ph==='trip'?'Trip Mode 🚗':'Post-Trip';
+  if (!silent) {
+    if (ph==='pre') showPanel('p-overview');
+    if (ph==='trip') showPanel('p-today');
+    if (ph==='post') { showPanel('p-post-stats'); updatePostStats(); }
+  }
+  save();
+}
+
+// ===== NAV =====
+function showPanel(id) {
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  const el = document.getElementById(id);
+  if(el) el.classList.add('active');
+  if(id==='p-stats') updateLeaderboard();
+}
+function setActiveNav(btn) {
+  const nav = document.querySelector('.bottom-nav[style=""] , .bottom-nav:not([style])');
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+}
+function showMoreMenu() { document.getElementById('more-modal').classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// ===== TOP BAR =====
+function updateTopBar() {
+  document.getElementById('tb-pts').textContent = state.points;
+  // sync player points
+  const p = state.players.find(x=>x.name===state.player);
+  if(p) p.points = state.points;
+  save();
+}
+
+// ===== TOAST =====
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2200);
+}
+
+function addPts(n, msg) {
+  state.points += n;
+  const p = state.players.find(x=>x.name===state.player);
+  if(p) p.points = state.points;
+  updateTopBar();
+  toast(`${msg || '+'+ n +' pts!'} ⭐`);
+  save();
+}
+
+// ===== COUNTDOWN =====
+function startCountdown() {
+  function tick() {
+    const dep = new Date('2026-06-10T08:00:00');
+    const now = new Date();
+    const diff = dep - now;
+    if (diff <= 0) { document.getElementById('countdown').textContent = '🚗 Road Trip Time!'; return; }
+    const d = Math.floor(diff/86400000);
+    const h = Math.floor((diff%86400000)/3600000);
+    const m = Math.floor((diff%3600000)/60000);
+    document.getElementById('countdown').textContent = `${d}d ${h}h ${m}m`;
+  }
+  tick(); setInterval(tick, 60000);
+}
+
+// ===== CHECKLIST =====
+function initChecklist() {
+  if (!state.checklist) state.checklist = {};
+  const el = document.getElementById('checklist-container');
+  let cat = ''; let html = '';
+  CHECKLIST_ITEMS.forEach(item => {
+    if (item.cat !== cat) {
+      if(cat) html += '</div>';
+      cat = item.cat;
+      html += `<div style="font-size:11px;color:var(--accent);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;margin-top:${cat==='Documents'?'0':'12px'}">${cat}</div><div>`;
+    }
+    const ck = state.checklist[item.id];
+    html += `<div class="check-item${ck?' checked':''}" onclick="toggleCheck('${item.id}',this)">
+      <div class="check-box">${ck?'✓':''}</div>
+      <div class="check-text">${item.text}</div>
+    </div>`;
+  });
+  html += '</div>';
+  el.innerHTML = html;
+}
+function toggleCheck(id, row) {
+  state.checklist[id] = !state.checklist[id];
+  row.classList.toggle('checked');
+  const box = row.querySelector('.check-box');
+  box.textContent = state.checklist[id] ? '✓' : '';
+  save();
+}
+
+// ===== MAP =====
+let leafMap = null;
+function initMap() {
+  if (leafMap) { leafMap.invalidateSize(); return; }
+  setTimeout(() => {
+    leafMap = L.map('map').setView([35.5, -101.5], 5);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(leafMap);
+    const allStops = [...STOPS.out, ...STOPS.co, ...STOPS.ret];
+    const outCoords = STOPS.out.map(s=>[s.lat,s.lng]);
+    const retCoords = STOPS.ret.map(s=>[s.lat,s.lng]);
+    L.polyline(outCoords, {color:'#a07bff',weight:3}).addTo(leafMap);
+    L.polyline(retCoords, {color:'#ff7b9c',weight:3,dashArray:'6,4'}).addTo(leafMap);
+    allStops.forEach(s => {
+      L.circleMarker([s.lat,s.lng],{radius:6,fillColor:s.type==='Hotel'?'#ffd700':s.type==='Milestone'?'#7bffd4':'#a07bff',color:'white',weight:1,fillOpacity:1})
+        .bindPopup(`<b>${s.icon} ${s.name}</b><br>${s.desc}`)
+        .addTo(leafMap);
+    });
+    renderStopTabs();
+    renderStops('out-1');
+    state.mapInit = true;
+  }, 100);
+}
+
+function renderStopTabs() {
+  const tabs = document.getElementById('day-tabs');
+  const groups = [
+    { id:'out-1', label:'Day 1: TX→Amarillo' },
+    { id:'out-2', label:'Day 2: →Colorado' },
+    { id:'co-3', label:'Day 3-5: Colorado' },
+    { id:'ret-6', label:'Day 6: →Amarillo' },
+    { id:'ret-7', label:'Day 7: →Home' },
+  ];
+  tabs.innerHTML = groups.map(g=>`<button class="day-tab${g.id===state.currentDay?' active':''}" onclick="selectDay('${g.id}',this)">${g.label}</button>`).join('');
+}
+
+function selectDay(id, btn) {
+  state.currentDay = id;
+  document.querySelectorAll('.day-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderStops(id);
+}
+
+function renderStops(dayId) {
+  const [dir, day] = dayId.split('-');
+  let stops;
+  if(dir==='co') stops = STOPS.co;
+  else stops = STOPS[dir==='out'?'out':'ret'].filter(s=>s.day===parseInt(day));
+  const el = document.getElementById('stops-list');
+  el.innerHTML = stops.map(s => {
+    const done = state.stops[s.id];
+    return `<div class="stop-card${done?' done':''}" onclick="openStopModal('${s.id}')">
+      <div class="stop-icon">${s.icon}</div>
+      <div class="stop-info">
+        <div class="stop-name">${s.name}</div>
+        <div class="stop-desc">${s.desc}</div>
+        <div class="stop-badges">
+          <span class="badge badge-blue">${s.type}</span>
+          ${done?'<span class="badge badge-done">✓ Done</span>':''}
+        </div>
+      </div>
+      ${!done?`<button class="btn-complete" onclick="event.stopPropagation();openStopModal('${s.id}')">Complete</button>`:'<span style="font-size:20px">✅</span>'}
+    </div>`;
+  }).join('');
+}
+
+function openStopModal(stopId) {
+  state.pendingStopId = stopId;
+  state.currentStarRating = 0;
+  const allStops = [...STOPS.out,...STOPS.co,...STOPS.ret];
+  const stop = allStops.find(s=>s.id===stopId);
+  document.getElementById('stop-modal-title').textContent = `${stop.icon} ${stop.name}`;
+  document.getElementById('stop-note').value = '';
+  document.querySelectorAll('.star-btn').forEach(s=>s.classList.remove('lit'));
+  document.getElementById('stop-modal').classList.add('open');
+}
+
+function setStars(n) {
+  state.currentStarRating = n;
+  document.querySelectorAll('.star-btn').forEach((s,i)=>s.classList.toggle('lit',i<n));
+}
+
+function confirmComplete() {
+  if (state.stops[state.pendingStopId]) { toast('Already completed!'); closeModal('stop-modal'); return; }
+  state.stops[state.pendingStopId] = { stars: state.currentStarRating, note: document.getElementById('stop-note').value };
+  let pts = 10;
+  if (state.currentStarRating) pts += 2;
+  if (document.getElementById('stop-note').value.trim()) pts += 3;
+  addPts(pts, `+${pts} pts — Stop Complete!`);
+  closeModal('stop-modal');
+  const [dir, day] = state.currentDay.split('-');
+  renderStops(state.currentDay);
+  save();
+}
+
+// ===== BINGO =====
+function initBingo() {
+  if (!state.bingo || state.bingo.length !== 25) {
+    const shuffled = [...BINGO_SQUARES].sort(()=>Math.random()-0.5);
+    state.bingo = shuffled.slice(0,24);
+    state.bingo.splice(12, 0, 'FREE');
+  }
+  if (!state.bingoMarked) state.bingoMarked = {};
+  renderBingo();
+}
+function renderBingo() {
+  const board = document.getElementById('bingo-board');
+  board.innerHTML = state.bingo.map((cell,i) => {
+    const isFree = cell === 'FREE';
+    const marked = state.bingoMarked[i] || isFree;
+    return `<div class="bingo-cell${isFree?' free':marked?' marked':''}" onclick="markBingo(${i})">${cell}</div>`;
+  }).join('');
+  document.getElementById('bingo-count').textContent = state.bingoPoints || 0;
+}
+function markBingo(i) {
+  if (state.bingo[i]==='FREE' || state.bingoMarked[i]) return;
+  state.bingoMarked[i] = true;
+  addPts(3, '+3 pts — Bingo square!');
+  state.bingoPoints = (state.bingoPoints||0) + 3;
+  checkBingo();
+  renderBingo();
+}
+function checkBingo() {
+  const m = state.bingoMarked;
+  const lines = [
+    [0,1,2,3,4],[5,6,7,8,9],[10,11,12,13,14],[15,16,17,18,19],[20,21,22,23,24],
+    [0,5,10,15,20],[1,6,11,16,21],[2,7,12,17,22],[3,8,13,18,23],[4,9,14,19,24],
+    [0,6,12,18,24],[4,8,12,16,20]
+  ];
+  lines.forEach(line => {
+    const key = line.join('-');
+    if (!state.bingoLines) state.bingoLines = {};
+    if (state.bingoLines[key]) return;
+    if (line.every(i=>m[i]||state.bingo[i]==='FREE')) {
+      state.bingoLines[key] = true;
+      addPts(50, '🎉 BINGO! +50 pts!');
+      confetti();
+    }
+  });
+}
+
+// ===== PLATES =====
+function initPlates() {
+  if (!state.plates) state.plates = [];
+  renderPlates();
+}
+function renderPlates() {
+  const grid = document.getElementById('plates-grid');
+  grid.innerHTML = US_STATES.map(s => `
+    <div class="plate-cell${state.plates.includes(s)?' found':''}" onclick="togglePlate('${s}')">
+      ${state.plates.includes(s)?'✓ ':''} ${s}
+    </div>`).join('');
+  document.getElementById('plates-count').textContent = state.plates.length;
+}
+function togglePlate(st) {
+  if (state.plates.includes(st)) return;
+  state.plates.push(st);
+  addPts(2, `+2 pts — ${st} spotted!`);
+  if (state.plates.length === 50) { addPts(50, '🎉 ALL 50 STATES! +50 pts!'); confetti(); }
+  renderPlates(); save();
+}
+
+// ===== SCAVENGER HUNT =====
+function initHunt() {
+  if (!state.huntFound) state.huntFound = [];
+  renderHunt();
+}
+function renderHunt() {
+  const list = document.getElementById('hunt-list');
+  list.innerHTML = HUNT_ITEMS.map((item,i) => {
+    const found = state.huntFound.includes(i);
+    return `<div class="hunt-item${found?' found':''}" onclick="toggleHunt(${i})">
+      <div class="hunt-check">${found?'✓':''}</div>
+      <div class="hunt-name">${item.name}</div>
+      <div class="hunt-pts">+${item.pts}</div>
+    </div>`;
+  }).join('');
+  let total = state.huntFound.reduce((a,i)=>a+HUNT_ITEMS[i].pts,0);
+  document.getElementById('hunt-pts').textContent = total;
+}
+function toggleHunt(i) {
+  if (state.huntFound.includes(i)) return;
+  state.huntFound.push(i);
+  addPts(HUNT_ITEMS[i].pts, `+${HUNT_ITEMS[i].pts} pts — Found it!`);
+  renderHunt(); save();
+}
+
+// ===== TRIVIA =====
+function initTrivia() {
+  if (!state.triviaProgress) state.triviaProgress = {};
+  renderTrivia();
+}
+function renderTrivia() {
+  const list = document.getElementById('trivia-list');
+  list.innerHTML = TRIVIA.map((q,qi) => {
+    const prog = state.triviaProgress[qi] || { attempts:0, solved:false };
+    const pts = prog.solved ? null : prog.attempts===0?10:prog.attempts===1?5:2;
+    return `<div class="trivia-q">
+      <div class="trivia-q-text">${qi+1}. ${q.q}</div>
+      ${prog.solved ? `<div style="color:var(--accent3);font-size:13px;font-weight:600;">✓ Correct! +${prog.ptsEarned} pts</div>` :
+        `<div class="trivia-opts">${q.opts.map((opt,oi)=>`
+          <button class="trivia-opt" onclick="answerTrivia(${qi},${oi})">${opt}</button>
+        `).join('')}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px;">Worth ${pts} pts · Attempt ${prog.attempts+1}</div>`
+      }
+    </div>`;
+  }).join('');
+  let total = Object.values(state.triviaProgress).reduce((a,p)=>a+(p.ptsEarned||0),0);
+  document.getElementById('trivia-pts').textContent = total;
+}
+function answerTrivia(qi, oi) {
+  if (!state.triviaProgress[qi]) state.triviaProgress[qi] = { attempts:0, solved:false };
+  const prog = state.triviaProgress[qi];
+  if (prog.solved) return;
+  prog.attempts++;
+  if (oi === TRIVIA[qi].ans) {
+    const pts = prog.attempts===1?10:prog.attempts===2?5:2;
+    prog.solved = true; prog.ptsEarned = pts;
+    addPts(pts, `+${pts} pts — Correct!`);
+  } else {
+    toast(`Wrong! Try again (${prog.attempts}/3)`);
+    if (prog.attempts >= 3) { prog.solved = false; }
+  }
+  renderTrivia(); save();
+}
+
+// ===== LEADERBOARD =====
+function addDemoPlayer() {
+  const names = ['Dalton','Jenna','Sharon','Cheryl','Lindsey'];
+  const avs = ['🎓','🚗','👩','💛','🌸'];
+  const existing = state.players.map(p=>p.name);
+  const toAdd = names.filter(n=>!existing.includes(n));
+  if(toAdd.length===0) { toast('All players added!'); return; }
+  const idx = names.indexOf(toAdd[0]);
+  state.players.push({ name:toAdd[0], avatar:avs[idx], points: Math.floor(Math.random()*100+10) });
+  updateLeaderboard(); save();
+}
+function updateLeaderboard() {
+  // make sure current player is up to date
+  const p = state.players.find(x=>x.name===state.player);
+  if(p) p.points = state.points;
+  const sorted = [...state.players].sort((a,b)=>b.points-a.points);
+  const colors = ['#ffd700','#c0c0c0','#cd7f32'];
+  document.getElementById('lb-list').innerHTML = sorted.map((p,i) => `
+    <div class="lb-row">
+      <div class="lb-rank" style="color:${colors[i]||'var(--muted)'}">${i===0?'🥇':i===1?'🥈':i===2?'🥉':i+1}</div>
+      <div class="lb-av">${p.avatar}</div>
+      <div class="lb-name">${p.name}${p.name===state.player?' (you)':''}</div>
+      <div class="lb-pts">${p.points}</div>
+    </div>`).join('');
+}
+
+// ===== MUSIC =====
+function submitSong() {
+  const song = document.getElementById('song-input').value.trim();
+  const artist = document.getElementById('artist-input').value.trim();
+  if(!song) { toast('Enter a song!'); return; }
+  state.songs.push({ song, artist, by: state.player, av: state.avatar, played: false, id: Date.now() });
+  document.getElementById('song-input').value = '';
+  document.getElementById('artist-input').value = '';
+  renderSongs(); save();
+}
+function renderSongs() {
+  const el = document.getElementById('song-queue');
+  if (!state.songs.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:12px;">No requests yet!</div>'; return; }
+  el.innerHTML = state.songs.map(s=>`
+    <div class="song-row">
+      <div style="font-size:22px">${s.av}</div>
+      <div class="song-info">
+        <div class="song-title">${s.song}</div>
+        <div class="song-meta">${s.artist ? `by ${s.artist} · ` : ''}${s.by}</div>
+      </div>
+      ${s.played?'<div class="song-played">▶ Played</div>':`<button class="btn-played" onclick="markPlayed(${s.id})">Mark Played</button>`}
+    </div>`).join('');
+}
+function markPlayed(id) {
+  const s = state.songs.find(x=>x.id===id);
+  if(s) { s.played = true; renderSongs(); save(); }
+}
+
+// ===== CHAT =====
+function sendChat() {
+  const input = document.getElementById('chat-input');
+  const msg = input.value.trim();
+  if(!msg) return;
+  state.chat.push({ name: state.player, av: state.avatar, msg, time: new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}), id: Date.now() });
+  if (state.chat.length > 200) state.chat = state.chat.slice(-200);
+  input.value = '';
+  renderChat(); save();
+}
+function renderChat() {
+  const el = document.getElementById('chat-msgs');
+  if (!state.chat.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:20px;">No messages yet. Say hi! 👋</div>'; return; }
+  el.innerHTML = state.chat.map(m=>`
+    <div class="msg-row${m.name===state.player?' mine':''}">
+      <div class="msg-av">${m.av}</div>
+      <div class="msg-bubble">
+        ${m.name!==state.player?`<div class="msg-name">${m.name}</div>`:''}
+        <div class="msg-text">${m.msg}</div>
+        <div class="msg-time">${m.time}</div>
+      </div>
+    </div>`).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+// ===== PHOTOS =====
+function addPhoto(input) {
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    state.photos.push({ src: e.target.result, by: state.player, av: state.avatar, id: Date.now() });
+    if (state.photos.length > 80) state.photos = state.photos.slice(-80);
+    addPts(5, '+5 pts — Photo uploaded!');
+    renderPhotos(); save();
+    input.value = '';
+  };
+  reader.readAsDataURL(file);
+}
+function renderPhotos() {
+  const grid = document.getElementById('photos-grid');
+  const uploadBtn = `<div class="photo-upload-btn" onclick="document.getElementById('photo-upload').click()">📷<br><span style="font-size:11px">Add</span></div>`;
+  const photos = state.photos.map(p=>`<img class="photo-thumb" src="${p.src}" title="${p.by}">`).join('');
+  grid.innerHTML = uploadBtn + photos;
+}
+
+// ===== BUDGET =====
+function addExpense() {
+  const cat = document.getElementById('exp-cat').value;
+  const desc = document.getElementById('exp-desc').value.trim();
+  const amt = parseFloat(document.getElementById('exp-amt').value);
+  if(!desc||isNaN(amt)||amt<=0) { toast('Fill in all fields!'); return; }
+  state.expenses.push({ cat, desc, amt, by: state.player, id: Date.now() });
+  document.getElementById('exp-desc').value = '';
+  document.getElementById('exp-amt').value = '';
+  renderExpenses(); save();
+}
+function renderExpenses() {
+  if(!state.expenses) state.expenses = [];
+  const total = state.expenses.reduce((a,e)=>a+e.amt,0);
+  const players = state.players.length || 1;
+  document.getElementById('total-spent').textContent = `$${total.toFixed(0)}`;
+  document.getElementById('per-person').textContent = `$${(total/Math.max(players,1)).toFixed(0)}`;
+  document.getElementById('sharon-contrib').textContent = `$0`;
+  document.getElementById('cheryl-contrib').textContent = `$0`;
+  const list = document.getElementById('expense-list');
+  if (!state.expenses.length) { list.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:12px;">No expenses yet</div>'; return; }
+  list.innerHTML = state.expenses.map(e=>`
+    <div class="expense-row">
+      <div class="exp-cat">${e.cat.split(' ')[0]}</div>
+      <div class="exp-info"><div class="exp-desc">${e.desc}</div><div class="exp-cat-lbl">${e.cat.split(' ').slice(1).join(' ')} · ${e.by}</div></div>
+      <div class="exp-amt">$${e.amt.toFixed(2)}</div>
+    </div>`).join('');
+}
+
+// ===== JOURNAL =====
+function addJournalEntry() {
+  const text = document.getElementById('journal-input').value.trim();
+  const day = document.getElementById('journal-day').value;
+  if(!text) { toast('Write something first!'); return; }
+  state.journal.push({ text, day, by: state.player, av: state.avatar, id: Date.now() });
+  document.getElementById('journal-input').value = '';
+  renderJournal(); save();
+}
+function renderJournal() {
+  const el = document.getElementById('journal-entries');
+  if(!state.journal||!state.journal.length) { el.innerHTML = '<div style="color:var(--muted);font-size:13px;text-align:center;padding:12px;">No entries yet — start writing!</div>'; return; }
+  el.innerHTML = state.journal.map(e=>`
+    <div class="journal-entry">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+        <span style="font-size:18px">${e.av}</span>
+        <div><div style="font-weight:600;font-size:14px">${e.by}</div><div style="font-size:11px;color:var(--muted)">${e.day}</div></div>
+      </div>
+      <div style="font-size:14px;line-height:1.6;color:var(--text)">${e.text}</div>
+    </div>`).join('');
+}
+
+// ===== POST-TRIP STATS =====
+function updatePostStats() {
+  const stopsCount = Object.keys(state.stops||{}).length;
+  const platesCount = (state.plates||[]).length;
+  const huntCount = (state.huntFound||[]).length;
+  const triviaCount = Object.values(state.triviaProgress||{}).filter(p=>p.solved).length;
+  document.getElementById('post-stats-content').innerHTML = `
+    <div class="hero-card" style="margin-bottom:16px;">
+      <div class="hero-emoji">🎉</div>
+      <div class="hero-title">Trip Complete!</div>
+      <div class="hero-sub">What an incredible journey, Dalton!</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      <div class="budget-chip"><div class="bval" style="color:var(--gold)">${state.points}</div><div class="blbl">Total Points</div></div>
+      <div class="budget-chip"><div class="bval" style="color:var(--accent)">${stopsCount}</div><div class="blbl">Stops Completed</div></div>
+      <div class="budget-chip"><div class="bval" style="color:var(--accent3)">${platesCount}</div><div class="blbl">Plates Found</div></div>
+      <div class="budget-chip"><div class="bval" style="color:var(--accent2)">${huntCount}</div><div class="blbl">Hunt Items</div></div>
+      <div class="budget-chip"><div class="bval" style="color:#7bb2ff">${triviaCount}</div><div class="blbl">Trivia Solved</div></div>
+      <div class="budget-chip"><div class="bval" style="color:var(--gold)">${(state.photos||[]).length}</div><div class="blbl">Photos</div></div>
+    </div>`;
+}
+
+// ===== WEATHER =====
+function loadWeather() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(pos => {
+      const { latitude, longitude } = pos.coords;
+      fetch(`https://wttr.in/${latitude},${longitude}?format=j1`)
+        .then(r=>r.json()).then(data => {
+          const cur = data.current_condition[0];
+          const temp = cur.temp_F;
+          const desc = cur.weatherDesc[0].value;
+          const icons = { Sunny:'☀️', Clear:'🌙', Cloudy:'☁️', Rain:'🌧️', Snow:'❄️', Thunder:'⛈️', Fog:'🌫️' };
+          const icon = Object.entries(icons).find(([k])=>desc.includes(k))?.[1] || '🌤️';
+          document.getElementById('weather-container').innerHTML = `
+            <div class="weather-card">
+              <div class="weather-icon">${icon}</div>
+              <div class="weather-temp">${temp}°F</div>
+              <div class="weather-desc">${desc}</div>
+              <div class="weather-loc">📍 Current Location</div>
+            </div>`;
+        }).catch(()=>loadDestWeather());
+    }, ()=>loadDestWeather());
+  } else { loadDestWeather(); }
+}
+function loadDestWeather() {
+  document.getElementById('weather-container').innerHTML = `
+    <div class="weather-card">
+      <div class="weather-icon">🌤️</div>
+      <div class="weather-temp">--°F</div>
+      <div class="weather-desc">Enable location for live weather</div>
+      <div class="weather-loc">📍 Tonight: Colorado Springs</div>
+    </div>`;
+}
+
+// ===== COLORADO CHECKPOINT =====
+function coloradoCheckpoint() {
+  if (state.coloradoUnlocked) { toast('Already unlocked! 🏔️'); return; }
+  state.coloradoUnlocked = true;
+  addPts(25, '🏔️ COLORADO! +25 pts!');
+  confetti(); confetti(); confetti();
+  save();
+}
+
+// ===== GAME SWITCHING =====
+function switchGame(name, btn) {
+  document.querySelectorAll('.game-tab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.game-panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById('game-'+name).classList.add('active');
+}
+
+// ===== CONFETTI =====
+function confetti() {
+  const colors = ['#a07bff','#ff7b9c','#7bffd4','#ffd700','#7bb2ff'];
+  for(let i=0;i<40;i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.cssText = `left:${Math.random()*100}vw;top:-10px;background:${colors[Math.floor(Math.random()*colors.length)]};animation-delay:${Math.random()*0.8}s;animation-duration:${1.5+Math.random()}s;transform:rotate(${Math.random()*360}deg);`;
+    document.body.appendChild(el);
+    setTimeout(()=>el.remove(), 3000);
+  }
+}
+
+// Start countdown on load even before login
+startCountdown();
+</script>
+</body>
+</html>
