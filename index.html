@@ -291,11 +291,19 @@
       <div class="hero-card">
         <div class="hero-emoji">🏔️</div>
         <div class="hero-title">Dalton's Graduation Road Trip</div>
-        <div class="hero-sub">June 10–16, 2026  ·  ~1,760 miles  ·  4 states</div>
+        <div class="hero-sub">June 10–16, 2026  ·  ~1,760 miles  ·  3 states</div>
       </div>
+
+      <!-- Countdown on Overview -->
+      <div class="card" style="text-align:center;margin-bottom:12px;">
+        <div style="font-size:12px;color:var(--muted);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;">⏳ Departing In</div>
+        <div id="countdown" style="display:flex;justify-content:center;gap:8px;"></div>
+        <div style="font-size:12px;color:var(--muted);margin-top:10px;">June 10, 2026 · 8:00 AM · Coldspring, TX</div>
+      </div>
+
       <div class="fact-row">
         <div class="fact-chip"><div class="fc-val">1,760</div><div class="fc-lbl">Total Miles</div></div>
-        <div class="fact-chip"><div class="fc-val">4</div><div class="fc-lbl">States</div></div>
+        <div class="fact-chip"><div class="fc-val">3</div><div class="fc-lbl">States</div></div>
         <div class="fact-chip"><div class="fc-val">7</div><div class="fc-lbl">Days</div></div>
       </div>
       <div class="fact-row">
@@ -303,25 +311,77 @@
         <div class="fact-chip"><div class="fc-val">Jun 11</div><div class="fc-lbl">Arrive CO</div></div>
         <div class="fact-chip"><div class="fc-val">Jun 16</div><div class="fc-lbl">Return</div></div>
       </div>
-      <div class="section-header">🎓 About Dalton</div>
+
+      <div class="section-header">🚗 Departure Details</div>
       <div class="card">
-        <p style="font-size:14px;color:var(--muted);line-height:1.6;">Celebrating Dalton's graduation with an epic road trip from Coldspring, TX to Colorado Springs, CO! University of Denver graduate heading to the Rockies for a well-earned adventure with family & friends.</p>
+        <div style="display:flex;gap:12px;align-items:flex-start;">
+          <span style="font-size:28px;flex-shrink:0;">📍</span>
+          <div>
+            <div style="font-weight:700;font-size:15px;margin-bottom:4px;">Departure Location</div>
+            <a href="https://maps.google.com/?q=299+Pine+Dr,+Coldspring,+TX+77331" target="_blank" style="color:var(--accent);font-size:14px;text-decoration:none;">299 Pine Dr, Coldspring, TX 77331 ↗</a>
+            <div style="font-size:13px;color:var(--muted);margin-top:6px;">📅 June 10, 2026 &nbsp;·&nbsp; ⏰ 8:00 AM sharp!</div>
+          </div>
+        </div>
       </div>
-      <div class="section-header">📞 Contacts</div>
+
+      <div class="section-header">🎓 Congratulations, Dalton!</div>
       <div class="card">
-        <div class="contact-row"><div class="contact-em">🎓</div><div><div class="contact-name">Dalton</div><div class="contact-detail">The Graduate</div></div></div>
-        <div class="contact-row"><div class="contact-em">💛</div><div><div class="contact-name">Lindsey</div><div class="contact-detail">Trip Support</div></div></div>
-        <div class="contact-row"><div class="contact-em">🚗</div><div><div class="contact-name">Jenna</div><div class="contact-detail">Driver · Truck</div></div></div>
-        <div class="contact-row"><div class="contact-em">👩</div><div><div class="contact-name">Sharon & Cheryl</div><div class="contact-detail">Supporting the adventure</div></div></div>
+        <p style="font-size:14px;color:var(--muted);line-height:1.6;">Celebrating Dalton's graduation with an epic road trip from Coldspring, TX to Colorado Springs, CO! He just earned his <b style="color:var(--text)">Master of Science</b> from the <b style="color:var(--text)">University of Denver</b> — and we're heading back to Colorado to celebrate in style! 🎉</p>
       </div>
+
+      <div class="section-header">🏛️ About the University of Denver</div>
+      <div class="card">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;">
+          <div class="fact-chip"><div class="fc-val">1864</div><div class="fc-lbl">Founded</div></div>
+          <div class="fact-chip"><div class="fc-val">162</div><div class="fc-lbl">Years Old</div></div>
+          <div class="fact-chip"><div class="fc-val">125</div><div class="fc-lbl">Acre Campus</div></div>
+          <div class="fact-chip"><div class="fc-val">~12K</div><div class="fc-lbl">Students</div></div>
+        </div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.7;">DU is a private research university located just 5 miles south of downtown Denver, CO. Founded in 1864 by Colorado Territory Governor John Evans — the same year Denver was still a frontier mining camp — it has grown into a top-tier R1 research university. The campus itself is a designated arboretum with over 120 acres of tree-filled grounds.</p>
+      </div>
+
+      <div class="section-header">⭐ DU Fun Facts</div>
+      <div class="card">
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div style="display:flex;gap:10px;align-items:flex-start;">
+            <span style="font-size:22px;flex-shrink:0;">🌹</span>
+            <div><b style="font-size:13px;">The DU Rose</b><br><span style="font-size:12px;color:var(--muted);">DU has its own unique flower — <i>Rosa Denvera</i>. A rose bush gifted in 1912 turned out to be a totally new variety, and it's still grown on campus today.</span></div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start;">
+            <span style="font-size:22px;flex-shrink:0;">🏒</span>
+            <div><b style="font-size:13px;">Pioneers Hockey</b><br><span style="font-size:12px;color:var(--muted);">DU is famous for its hockey program — one of the best in the country. They camp out overnight just to get season tickets. Yes, in Colorado winter.</span></div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start;">
+            <span style="font-size:22px;flex-shrink:0;">✈️</span>
+            <div><b style="font-size:13px;">#1 for Study Abroad</b><br><span style="font-size:12px;color:var(--muted);">Over 71% of DU undergrads study abroad — ranked #1 in the nation. DU even covers the extra cost through the Cherrington Global Scholars program.</span></div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start;">
+            <span style="font-size:22px;flex-shrink:0;">🏔️</span>
+            <div><b style="font-size:13px;">Mountain Campus</b><br><span style="font-size:12px;color:var(--muted);">DU has a 724-acre mountain campus near Roosevelt National Forest — students go there for team retreats, workshops, and outdoor adventures.</span></div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start;">
+            <span style="font-size:22px;flex-shrink:0;">🪶</span>
+            <div><b style="font-size:13px;">The Pioneers</b><br><span style="font-size:12px;color:var(--muted);">DU's team nickname has been the Pioneers since 1925. Their most beloved mascot was Denver Boone — a cartoon pioneer designed by a Walt Disney artist in 1968!</span></div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start;">
+            <span style="font-size:22px;flex-shrink:0;">🎉</span>
+            <div><b style="font-size:13px;">May Days</b><br><span style="font-size:12px;color:var(--muted);">DU's longest-running tradition since 1913 — a week of outdoor events and celebrations right before finals every spring. The perfect sendoff for graduates!</span></div>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start;">
+            <span style="font-size:22px;flex-shrink:0;">🥇</span>
+            <div><b style="font-size:13px;">Top Ranked</b><br><span style="font-size:12px;color:var(--muted);">Ranked among the top research universities in the US, and named a "Dream School" by education journalist Jeff Selingo in his 2025 book.</span></div>
+          </div>
+        </div>
+      </div>
+
       <div class="section-header">🗺️ Route Overview</div>
       <div class="card">
         <div style="font-size:13px;color:var(--muted);line-height:1.8;">
-          📍 <b style="color:var(--text)">Day 1</b> — Coldspring, TX → Amarillo, TX<br>
-          📍 <b style="color:var(--text)">Day 2</b> — Amarillo → Colorado Springs, CO<br>
+          📍 <b style="color:var(--text)">Day 1</b> — Coldspring, TX → Lubbock, TX<br>
+          📍 <b style="color:var(--text)">Day 2</b> — Lubbock → Colorado Springs, CO<br>
           🏔️ <b style="color:var(--text)">Days 3-5</b> — Explore Colorado Springs<br>
-          📍 <b style="color:var(--text)">Day 6</b> — Colorado Springs → Amarillo<br>
-          📍 <b style="color:var(--text)">Day 7</b> — Amarillo → Coldspring, TX
+          📍 <b style="color:var(--text)">Day 6</b> — Colorado Springs → Lubbock, TX<br>
+          📍 <b style="color:var(--text)">Day 7</b> — Lubbock → Coldspring, TX
         </div>
       </div>
       <div id="start-trip-section" style="margin-top:16px;">
@@ -332,10 +392,6 @@
     <!-- CHECKLIST -->
     <div class="panel" id="p-prep">
       <div class="section-header">📋 Pre-Trip Checklist</div>
-      <div id="countdown-card" class="card" style="text-align:center;margin-bottom:16px;">
-        <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">Time Until Departure</div>
-        <div id="countdown" style="font-family:'Syne',sans-serif;font-size:28px;font-weight:800;color:var(--accent);">Loading...</div>
-      </div>
       <div class="card" id="checklist-container"></div>
     </div>
 
@@ -568,17 +624,17 @@ const STOPS = {
   out: [
     { id:'o1', name:'Coldspring, TX Departure', icon:'🏠', type:'Start', desc:'Home base — load up and hit the road!', day:1, lat:30.9162, lng:-95.1352 },
     { id:'o2', name:'Huntsville State Park', icon:'🌲', type:'Stop', desc:'Stretch your legs in Sam Houston National Forest', day:1, lat:30.6224, lng:-95.5233 },
-    { id:'o3', name:'Dallas Lunch Stop', icon:'🍔', type:'Food', desc:'Big D lunch break', day:1, lat:32.7767, lng:-96.7970 },
-    { id:'o4', name:'Wichita Falls', icon:'💦', type:'Stop', desc:'Famous waterfall stop and fuel up', day:1, lat:33.9137, lng:-98.4934 },
-    { id:'o5', name:'Amarillo, TX', icon:'🏨', type:'Hotel', desc:'Night 1 — Texas Panhandle stop', day:1, lat:35.2220, lng:-101.8313 },
-    { id:'o6', name:'Cadillac Ranch', icon:'🚗', type:'Attraction', desc:'Iconic buried Cadillacs art installation', day:2, lat:35.1872, lng:-101.9870 },
-    { id:'o7', name:'New Mexico State Line', icon:'🪧', type:'Milestone', desc:'Welcome to New Mexico! 3rd state!', day:2, lat:35.1822, lng:-103.0426 },
-    { id:'o8', name:'Santa Fe', icon:'🏛️', type:'Stop', desc:'Historic plaza, amazing food, art galleries', day:2, lat:35.6870, lng:-105.9378 },
+    { id:'o3', name:'Dallas / Fort Worth', icon:'🍔', type:'Food', desc:'Big D lunch break — pick your favorite spot', day:1, lat:32.7767, lng:-96.7970 },
+    { id:'o4', name:'Abilene', icon:'⛽', type:'Stop', desc:'Fuel up and stretch — halfway across Texas', day:1, lat:32.4487, lng:-99.7331 },
+    { id:'o5', name:'Lubbock, TX', icon:'🏨', type:'Hotel', desc:'Night 1 — Hub City, home of Texas Tech', day:1, lat:33.5779, lng:-101.8552 },
+    { id:'o6', name:'Buddy Holly Center', icon:'🎸', type:'Attraction', desc:'Lubbock\'s most famous son — rock & roll history!', day:2, lat:33.5779, lng:-101.8552 },
+    { id:'o7', name:'New Mexico State Line', icon:'🪧', type:'Milestone', desc:'Welcome to New Mexico! 2nd state!', day:2, lat:34.0000, lng:-103.0426 },
+    { id:'o8', name:'Santa Rosa, NM', icon:'⛽', type:'Stop', desc:'Fuel stop on Route 66 — Blue Hole is nearby!', day:2, lat:34.9387, lng:-104.6819 },
     { id:'o9', name:'Colorado State Line', icon:'🏔️', type:'Milestone', desc:'YOU MADE IT TO COLORADO! 🎉', day:2, lat:37.0009, lng:-105.0000 },
     { id:'o10', name:'Colorado Springs', icon:'🏔️', type:'Hotel', desc:'Base camp for the Colorado adventure!', day:2, lat:38.8339, lng:-104.8214 },
   ],
   co: [
-    { id:'c1', name:'Garden of the Gods', icon:'🪨', type:'Attraction', desc:'Spectacular red rock formations', day:3, lat:38.8787, lng:-104.8756 },
+    { id:'c1', name:'Garden of the Gods', icon:'🪨', type:'Attraction', desc:'Spectacular red rock formations — free to visit!', day:3, lat:38.8787, lng:-104.8756 },
     { id:'c2', name:'Pikes Peak Summit', icon:'⛰️', type:'Attraction', desc:'14,115 ft above sea level — incredible views!', day:3, lat:38.8405, lng:-105.0442 },
     { id:'c3', name:'Old Colorado City', icon:'🛍️', type:'Food', desc:'Historic district — lunch and shops', day:3, lat:38.8338, lng:-104.8591 },
     { id:'c4', name:'US Air Force Academy', icon:'✈️', type:'Attraction', desc:'Stunning chapel and visitor center', day:4, lat:38.9981, lng:-104.8614 },
@@ -587,12 +643,12 @@ const STOPS = {
   ],
   ret: [
     { id:'r1', name:'Colorado Springs Departure', icon:'👋', type:'Start', desc:'Goodbye Colorado! What a trip!', day:6, lat:38.8339, lng:-104.8214 },
-    { id:'r2', name:'Pueblo', icon:'⛽', type:'Stop', desc:'Fuel and snacks', day:6, lat:38.2544, lng:-104.6091 },
-    { id:'r3', name:'New Mexico Again', icon:'🌵', type:'Milestone', desc:'Through the Land of Enchantment', day:6, lat:36.7173, lng:-104.9810 },
-    { id:'r4', name:'Amarillo Return Night', icon:'🏨', type:'Hotel', desc:'Night 2 on the road', day:6, lat:35.2220, lng:-101.8313 },
-    { id:'r5', name:'Texas Panhandle Drive', icon:'🌾', type:'Stop', desc:'Big sky country — spot some longhorns', day:7, lat:33.5779, lng:-101.8552 },
-    { id:'r6', name:'Dallas Lunch Return', icon:'🍔', type:'Food', desc:'Last big city lunch', day:7, lat:32.7767, lng:-96.7970 },
-    { id:'r7', name:'Coldspring, TX Home!', icon:'🏠', type:'End', desc:'WELCOME HOME GRADUATES! 🎓🎉', day:7, lat:30.9162, lng:-95.1352 },
+    { id:'r2', name:'Pueblo', icon:'⛽', type:'Stop', desc:'Fuel and snacks heading south', day:6, lat:38.2544, lng:-104.6091 },
+    { id:'r3', name:'New Mexico Drive-Through', icon:'🌵', type:'Milestone', desc:'Through the Land of Enchantment', day:6, lat:36.7173, lng:-104.9810 },
+    { id:'r4', name:'Lubbock Return Night', icon:'🏨', type:'Hotel', desc:'Night on the road back home', day:6, lat:33.5779, lng:-101.8552 },
+    { id:'r5', name:'Abilene Return Stop', icon:'⛽', type:'Stop', desc:'Fuel up for the final stretch home', day:7, lat:32.4487, lng:-99.7331 },
+    { id:'r6', name:'Dallas / Fort Worth', icon:'🍔', type:'Food', desc:'Last big city lunch before home stretch', day:7, lat:32.7767, lng:-96.7970 },
+    { id:'r7', name:'Coldspring, TX Home!', icon:'🏠', type:'End', desc:'WELCOME HOME GRADUATE! 🎓🎉', day:7, lat:30.9162, lng:-95.1352 },
   ]
 };
 
@@ -617,38 +673,50 @@ const BINGO_SQUARES = [
 ];
 
 const TRIVIA = [
-  { q:'What is the University of Denver\'s mascot?', opts:['Pioneer','Bronco','Eagle','Bear'], ans:0 },
-  { q:'Colorado Springs is located at approximately what altitude?', opts:['4,000 ft','5,000 ft','6,000 ft','7,000 ft'], ans:2 },
+  { q:'What year was the University of Denver founded?', opts:['1850','1864','1880','1902'], ans:1 },
+  { q:'What is the University of Denver\'s athletic nickname?', opts:['Cowboys','Buffaloes','Pioneers','Mountaineers'], ans:2 },
+  { q:'DU\'s beloved mascot Denver Boone was designed by artists from which famous studio?', opts:['Pixar','DreamWorks','Walt Disney','Hanna-Barbera'], ans:2 },
+  { q:'DU ranks #1 in the nation for what?', opts:['Hockey','Study Abroad','Business','Research'], ans:1 },
+  { q:'What percentage of DU undergrads study abroad?', opts:['25%','45%','71%','90%'], ans:2 },
   { q:'What is Pikes Peak\'s elevation?', opts:['12,000 ft','13,500 ft','14,115 ft','15,000 ft'], ans:2 },
-  { q:'Which highway is the primary route through the Texas Panhandle?', opts:['I-10','I-20','I-40','I-35'], ans:2 },
   { q:'Garden of the Gods is located in which Colorado city?', opts:['Denver','Boulder','Colorado Springs','Pueblo'], ans:2 },
-  { q:'What color are the famous rock formations at Garden of the Gods?', opts:['Orange','Red','White','Brown'], ans:1 },
-  { q:'The University of Denver was founded in what year?', opts:['1864','1885','1902','1920'], ans:0 },
-  { q:'Cadillac Ranch is located near which Texas city?', opts:['Dallas','Lubbock','Amarillo','Abilene'], ans:2 },
+  { q:'DU has its own unique flower variety. What is it called?', opts:['Rosa Denvera','Rosa Pioneerа','Colorado Bloom','DU Daisy'], ans:0 },
+  { q:'Colorado Springs is located at approximately what altitude?', opts:['4,000 ft','5,000 ft','6,000 ft','7,000 ft'], ans:2 },
+  { q:'What famous rock musician was born in Lubbock, TX?', opts:['Elvis Presley','Buddy Holly','Chuck Berry','Jerry Lee Lewis'], ans:1 },
   { q:'Colorado is nicknamed the __ State', opts:['Mountain','Centennial','Rocky','High'], ans:1 },
-  { q:'What river runs through Colorado Springs?', opts:['Arkansas River','Colorado River','Pikes Peak Creek','Monument Creek'], ans:3 },
+  { q:'DU\'s campus is a designated what?', opts:['National Park','Arboretum','Historic District','Wildlife Refuge'], ans:1 },
 ];
 
 const CHECKLIST_ITEMS = [
-  { id:'doc1', text:'Driver\'s license / ID', cat:'Documents' },
-  { id:'doc2', text:'Insurance & registration', cat:'Documents' },
-  { id:'doc3', text:'Cash + cards', cat:'Documents' },
-  { id:'tech1', text:'Phone chargers (all)', cat:'Tech' },
-  { id:'tech2', text:'Car charger / power bank', cat:'Tech' },
-  { id:'tech3', text:'Aux cord / Bluetooth', cat:'Tech' },
-  { id:'tech4', text:'Camera / GoPro', cat:'Tech' },
-  { id:'cloth1', text:'5+ days of clothing', cat:'Clothes' },
-  { id:'cloth2', text:'Layers for Colorado cold', cat:'Clothes' },
-  { id:'cloth3', text:'Comfortable walking shoes', cat:'Clothes' },
-  { id:'snack1', text:'Road trip snacks loaded', cat:'Snacks' },
-  { id:'snack2', text:'Cooler with drinks', cat:'Snacks' },
-  { id:'car1', text:'Oil checked', cat:'Car' },
-  { id:'car2', text:'Tires inflated', cat:'Car' },
-  { id:'car3', text:'Emergency kit in truck', cat:'Car' },
-  { id:'car4', text:'Gas tank full', cat:'Car' },
-  { id:'misc1', text:'Sunscreen packed', cat:'Misc' },
-  { id:'misc2', text:'First aid kit', cat:'Misc' },
-  { id:'misc3', text:'Download offline maps', cat:'Misc' },
+  { id:'grad1', text:'Diploma packed safely', cat:'🎓 Graduation' },
+  { id:'grad2', text:'Cap & gown (for photos!)', cat:'🎓 Graduation' },
+  { id:'grad3', text:'Graduation photos printed or saved', cat:'🎓 Graduation' },
+  { id:'grad4', text:'Celebration playlist ready', cat:'🎓 Graduation' },
+  { id:'doc1', text:'Driver\'s license / ID', cat:'📄 Documents' },
+  { id:'doc2', text:'Insurance & registration', cat:'📄 Documents' },
+  { id:'doc3', text:'Cash + cards', cat:'📄 Documents' },
+  { id:'doc4', text:'Hotel confirmations saved', cat:'📄 Documents' },
+  { id:'tech1', text:'Phone chargers (all)', cat:'📱 Tech' },
+  { id:'tech2', text:'Car charger / power bank', cat:'📱 Tech' },
+  { id:'tech3', text:'Aux cord / Bluetooth checked', cat:'📱 Tech' },
+  { id:'tech4', text:'Camera / GoPro charged', cat:'📱 Tech' },
+  { id:'tech5', text:'Download offline maps (Google Maps)', cat:'📱 Tech' },
+  { id:'cloth1', text:'7 days of clothing', cat:'👕 Clothes' },
+  { id:'cloth2', text:'Layers — Colorado gets cold at night', cat:'👕 Clothes' },
+  { id:'cloth3', text:'Rain jacket or hoodie', cat:'👕 Clothes' },
+  { id:'cloth4', text:'Comfortable walking/hiking shoes', cat:'👕 Clothes' },
+  { id:'snack1', text:'Road trip snacks loaded', cat:'🍿 Snacks' },
+  { id:'snack2', text:'Cooler with drinks & ice', cat:'🍿 Snacks' },
+  { id:'snack3', text:'Gas station survival kit (gum, sunflower seeds, etc.)', cat:'🍿 Snacks' },
+  { id:'car1', text:'Oil & fluids checked', cat:'🚗 Truck Check' },
+  { id:'car2', text:'Tires inflated properly', cat:'🚗 Truck Check' },
+  { id:'car3', text:'Emergency kit in truck bed', cat:'🚗 Truck Check' },
+  { id:'car4', text:'Gas tank full before leaving', cat:'🚗 Truck Check' },
+  { id:'car5', text:'Luggage secured in truck', cat:'🚗 Truck Check' },
+  { id:'misc1', text:'Sunscreen & bug spray', cat:'🌞 Misc' },
+  { id:'misc2', text:'First aid kit', cat:'🌞 Misc' },
+  { id:'misc3', text:'Sunglasses', cat:'🌞 Misc' },
+  { id:'misc4', text:'Everyone\'s confirmed for departure time', cat:'🌞 Misc' },
 ];
 
 // ===== STATE =====
@@ -763,13 +831,24 @@ function startCountdown() {
     const dep = new Date('2026-06-10T08:00:00');
     const now = new Date();
     const diff = dep - now;
-    if (diff <= 0) { document.getElementById('countdown').textContent = '🚗 Road Trip Time!'; return; }
-    const d = Math.floor(diff/86400000);
-    const h = Math.floor((diff%86400000)/3600000);
-    const m = Math.floor((diff%3600000)/60000);
-    document.getElementById('countdown').textContent = `${d}d ${h}h ${m}m`;
+    const el = document.getElementById('countdown');
+    if (!el) return;
+    if (diff <= 0) {
+      el.innerHTML = '<div style="font-family:\'Syne\',sans-serif;font-size:22px;font-weight:800;color:var(--accent3);">🚗 Road Trip Time!</div>';
+      return;
+    }
+    const d = Math.floor(diff / 86400000);
+    const h = Math.floor((diff % 86400000) / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    const block = (val, label) => `
+      <div style="background:var(--surface2);border-radius:10px;padding:10px 8px;min-width:58px;">
+        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:26px;color:var(--accent);line-height:1;">${String(val).padStart(2,'0')}</div>
+        <div style="font-size:10px;color:var(--muted);margin-top:3px;text-transform:uppercase;letter-spacing:0.5px;">${label}</div>
+      </div>`;
+    el.innerHTML = block(d,'Days') + block(h,'Hrs') + block(m,'Min') + block(s,'Sec');
   }
-  tick(); setInterval(tick, 60000);
+  tick(); setInterval(tick, 1000);
 }
 
 // ===== CHECKLIST =====
@@ -805,7 +884,7 @@ let leafMap = null;
 function initMap() {
   if (leafMap) { leafMap.invalidateSize(); return; }
   setTimeout(() => {
-    leafMap = L.map('map').setView([35.5, -101.5], 5);
+    leafMap = L.map('map').setView([35.0, -102.0], 5);
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap' }).addTo(leafMap);
     const allStops = [...STOPS.out, ...STOPS.co, ...STOPS.ret];
     const outCoords = STOPS.out.map(s=>[s.lat,s.lng]);
